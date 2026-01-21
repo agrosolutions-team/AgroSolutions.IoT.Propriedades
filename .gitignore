@@ -1,0 +1,27 @@
+## Ignorar binários e arquivos temporários
+bin/
+obj/
+*.user
+*.suo
+*.cache
+
+## Ignorar arquivos do Visual Studio
+.vs/
+*.userprefs
+
+## Ignorar arquivos de configuração local
+appsettings.Development.json
+appsettings.Local.json
+
+## Ignorar packages do NuGet
+*.nupkg
+packages/
+
+## Ignorar logs
+*.log
+
+## Ignorar arquivos do Rider
+.idea/
+
+## Ignorar arquivos do VS Code
+.vscode/
