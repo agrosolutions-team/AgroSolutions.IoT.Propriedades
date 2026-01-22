@@ -52,6 +52,24 @@ public class TalhaoService
         return talhoes.Select(MapearParaResponse);
     }
 
+    public async Task<TalhaoResponse> ObterPorIdAsync(Guid id, Guid produtorId)
+    {
+        var talhao = await _talhaoRepository.ObterPorIdAsync(id);
+
+        if (talhao == null)
+            throw new InvalidOperationException("Talhão não encontrado");
+
+        var propriedade = await _propriedadeRepository.ObterPorIdAsync(talhao.PropriedadeId);
+
+        if (propriedade == null)
+            throw new InvalidOperationException("Propriedade não encontrada");
+
+        if (propriedade.ProdutorId != produtorId)
+            throw new UnauthorizedAccessException("Talhão não pertence ao produtor");
+
+        return MapearParaResponse(talhao);
+    }
+
     private static TalhaoResponse MapearParaResponse(Talhao talhao)
     {
         return new TalhaoResponse

@@ -190,4 +190,97 @@ public class TalhaoServiceTests
 
         _mockTalhaoRepository.Verify(r => r.ListarPorPropriedadeIdAsync(It.IsAny<Guid>()), Times.Never);
     }
+
+    [Fact]
+    public async Task ObterPorIdAsync_DeveRetornarTalhao_QuandoExistirEProduzidorForDono()
+    {
+        // Arrange
+        var produtorId = Guid.NewGuid();
+        var propriedade = Propriedade.Criar("Fazenda Teste", produtorId);
+        var talhao = Talhao.Criar("Talhão 01", 10m, "Soja", propriedade.Id);
+
+        _mockTalhaoRepository
+            .Setup(r => r.ObterPorIdAsync(talhao.Id))
+            .ReturnsAsync(talhao);
+
+        _mockPropriedadeRepository
+            .Setup(r => r.ObterPorIdAsync(propriedade.Id))
+            .ReturnsAsync(propriedade);
+
+        // Act
+        var resultado = await _service.ObterPorIdAsync(talhao.Id, produtorId);
+
+        // Assert
+        resultado.Should().NotBeNull();
+        resultado.Id.Should().Be(talhao.Id);
+        resultado.PropriedadeId.Should().Be(propriedade.Id);
+    }
+
+    [Fact]
+    public async Task ObterPorIdAsync_DeveLancarException_QuandoTalhaoNaoExistir()
+    {
+        // Arrange
+        var produtorId = Guid.NewGuid();
+        var talhaoId = Guid.NewGuid();
+
+        _mockTalhaoRepository
+            .Setup(r => r.ObterPorIdAsync(talhaoId))
+            .ReturnsAsync((Talhao)null);
+
+        // Act
+        Func<Task> act = async () => await _service.ObterPorIdAsync(talhaoId, produtorId);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("Talhão não encontrado");
+    }
+
+    [Fact]
+    public async Task ObterPorIdAsync_DeveLancarException_QuandoPropriedadeNaoExistir()
+    {
+        // Arrange
+        var produtorId = Guid.NewGuid();
+        var propriedadeId = Guid.NewGuid();
+        var talhao = Talhao.Criar("Talhão 01", 10m, "Soja", propriedadeId);
+
+        _mockTalhaoRepository
+            .Setup(r => r.ObterPorIdAsync(talhao.Id))
+            .ReturnsAsync(talhao);
+
+        _mockPropriedadeRepository
+            .Setup(r => r.ObterPorIdAsync(propriedadeId))
+            .ReturnsAsync((Propriedade)null);
+
+        // Act
+        Func<Task> act = async () => await _service.ObterPorIdAsync(talhao.Id, produtorId);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("Propriedade não encontrada");
+    }
+
+    [Fact]
+    public async Task ObterPorIdAsync_DeveLancarUnauthorized_QuandoPropriedadeNaoPertencerAoProdutor()
+    {
+        // Arrange
+        var produtorId = Guid.NewGuid();
+        var outroProdutorId = Guid.NewGuid();
+        var propriedade = Propriedade.Criar("Fazenda Teste", outroProdutorId);
+        var talhao = Talhao.Criar("Talhão 01", 10m, "Soja", propriedade.Id);
+
+        _mockTalhaoRepository
+            .Setup(r => r.ObterPorIdAsync(talhao.Id))
+            .ReturnsAsync(talhao);
+
+        _mockPropriedadeRepository
+            .Setup(r => r.ObterPorIdAsync(propriedade.Id))
+            .ReturnsAsync(propriedade);
+
+        // Act
+        Func<Task> act = async () => await _service.ObterPorIdAsync(talhao.Id, produtorId);
+
+        // Assert
+        await act.Should().ThrowAsync<UnauthorizedAccessException>()
+            .WithMessage("Talhão não pertence ao produtor");
+    }
 }

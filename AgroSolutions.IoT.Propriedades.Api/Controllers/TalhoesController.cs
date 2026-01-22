@@ -64,6 +64,33 @@ public class TalhoesController : ControllerBase
         }
     }
 
+    [HttpGet("~/api/talhoes/{id}")]
+    public async Task<IActionResult> ObterTalhaoPorId(Guid id)
+    {
+        try
+        {
+            var produtorId = ObterProdutorId();
+            var talhao = await _talhaoService.ObterPorIdAsync(id, produtorId);
+            return Ok(talhao);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Erro ao obter talhão", details = ex.Message });
+        }
+    }
+
     private Guid ObterProdutorId()
     {
         var subClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 

@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AgroSolutions.IoT.Propriedades.Domain\AgroSolutions.IoT.Propriedades.Domain.csproj" />
     <ProjectReference Include="..\AgroSolutions.IoT.Propriedades.Application\AgroSolutions.IoT.Propriedades.Application.csproj" />
+    <ProjectReference Include="..\AgroSolutions.IoT.Propriedades.Api\AgroSolutions.IoT.Propriedades.Api.csproj" />
   </ItemGroup>
 
 </Project>
