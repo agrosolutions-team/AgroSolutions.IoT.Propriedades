@@ -39,9 +39,9 @@ public class PropriedadeService
         return MapearParaResponse(propriedade);
     }
 
-    public async Task<IEnumerable<PropriedadeResponse>> ListarPropriedadesDoProdutorAsync(Guid produtorId)
+    public async Task<IEnumerable<PropriedadeResponse>> ListarPropriedadesDoProdutorAsync()
     {
-        var propriedades = await _propriedadeRepository.ListarPorProdutorIdAsync(produtorId);
+        var propriedades = await _propriedadeRepository.ListarPorProdutorIdAsync();
         return propriedades.Select(MapearParaResponse);
     }
 

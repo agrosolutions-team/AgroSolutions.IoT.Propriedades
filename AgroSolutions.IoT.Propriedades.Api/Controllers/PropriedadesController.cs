@@ -38,12 +38,12 @@ public class PropriedadesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> ListarPropriedades()
     {
         try
         {
-            var produtorId = ObterProdutorId();
-            var propriedades = await _propriedadeService.ListarPropriedadesDoProdutorAsync(produtorId);
+            var propriedades = await _propriedadeService.ListarPropriedadesDoProdutorAsync();
             return Ok(propriedades);
         }
         catch (Exception ex)

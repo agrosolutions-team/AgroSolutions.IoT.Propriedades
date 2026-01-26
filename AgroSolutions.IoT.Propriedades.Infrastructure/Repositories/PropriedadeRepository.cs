@@ -21,11 +21,10 @@ public class PropriedadeRepository : IPropriedadeRepository
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public async Task<IEnumerable<Propriedade>> ListarPorProdutorIdAsync(Guid produtorId)
+    public async Task<IEnumerable<Propriedade>> ListarPorProdutorIdAsync()
     {
         return await _context.Propriedades
             .Include(p => p.Talhoes)
-            .Where(p => p.ProdutorId == produtorId)
             .ToListAsync();
     }
 

@@ -16,15 +16,12 @@ public class TalhaoService
         _propriedadeRepository = propriedadeRepository;
     }
 
-    public async Task<TalhaoResponse> AdicionarTalhaoAsync(Guid propriedadeId, CriarTalhaoRequest request, Guid produtorId)
+    public async Task<TalhaoResponse> AdicionarTalhaoAsync(Guid propriedadeId, CriarTalhaoRequest request)
     {
         var propriedade = await _propriedadeRepository.ObterPorIdAsync(propriedadeId);
 
         if (propriedade == null)
             throw new InvalidOperationException("Propriedade não encontrada");
-
-        if (propriedade.ProdutorId != produtorId)
-            throw new UnauthorizedAccessException("Propriedade não pertence ao produtor");
 
         var talhao = Talhao.Criar(
             request.Nome,
@@ -38,34 +35,23 @@ public class TalhaoService
         return MapearParaResponse(talhao);
     }
 
-    public async Task<IEnumerable<TalhaoResponse>> ListarTalhoesPorPropriedadeAsync(Guid propriedadeId, Guid produtorId)
+    public async Task<IEnumerable<TalhaoResponse>> ListarTalhoesPorPropriedadeAsync(Guid propriedadeId)
     {
         var propriedade = await _propriedadeRepository.ObterPorIdAsync(propriedadeId);
 
         if (propriedade == null)
             throw new InvalidOperationException("Propriedade não encontrada");
 
-        if (propriedade.ProdutorId != produtorId)
-            throw new UnauthorizedAccessException("Propriedade não pertence ao produtor");
-
         var talhoes = await _talhaoRepository.ListarPorPropriedadeIdAsync(propriedadeId);
         return talhoes.Select(MapearParaResponse);
     }
 
-    public async Task<TalhaoResponse> ObterPorIdAsync(Guid id, Guid produtorId)
+    public async Task<TalhaoResponse> ObterPorIdAsync(Guid id)
     {
         var talhao = await _talhaoRepository.ObterPorIdAsync(id);
 
         if (talhao == null)
             throw new InvalidOperationException("Talhão não encontrado");
-
-        var propriedade = await _propriedadeRepository.ObterPorIdAsync(talhao.PropriedadeId);
-
-        if (propriedade == null)
-            throw new InvalidOperationException("Propriedade não encontrada");
-
-        if (propriedade.ProdutorId != produtorId)
-            throw new UnauthorizedAccessException("Talhão não pertence ao produtor");
 
         return MapearParaResponse(talhao);
     }

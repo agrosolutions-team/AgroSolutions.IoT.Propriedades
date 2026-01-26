@@ -113,17 +113,17 @@ public class PropriedadeServiceTests
         };
 
         _mockRepository
-            .Setup(r => r.ListarPorProdutorIdAsync(produtorId))
+            .Setup(r => r.ListarPorProdutorIdAsync())
             .ReturnsAsync(propriedades);
 
         // Act
-        var resultado = await _service.ListarPropriedadesDoProdutorAsync(produtorId);
+        var resultado = await _service.ListarPropriedadesDoProdutorAsync();
 
         // Assert
         resultado.Should().HaveCount(2);
         resultado.Select(p => p.Nome).Should().Contain(new[] { "Fazenda 1", "Fazenda 2" });
 
-        _mockRepository.Verify(r => r.ListarPorProdutorIdAsync(produtorId), Times.Once);
+        _mockRepository.Verify(r => r.ListarPorProdutorIdAsync(), Times.Once);
     }
 
     [Fact]
@@ -132,16 +132,16 @@ public class PropriedadeServiceTests
         // Arrange
         var produtorId = Guid.NewGuid();
         _mockRepository
-            .Setup(r => r.ListarPorProdutorIdAsync(produtorId))
+            .Setup(r => r.ListarPorProdutorIdAsync())
             .ReturnsAsync(new List<Propriedade>());
 
         // Act
-        var resultado = await _service.ListarPropriedadesDoProdutorAsync(produtorId);
+        var resultado = await _service.ListarPropriedadesDoProdutorAsync();
 
         // Assert
         resultado.Should().BeEmpty();
 
-        _mockRepository.Verify(r => r.ListarPorProdutorIdAsync(produtorId), Times.Once);
+        _mockRepository.Verify(r => r.ListarPorProdutorIdAsync(), Times.Once);
     }
 
     [Fact]

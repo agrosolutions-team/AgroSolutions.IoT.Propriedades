@@ -2,7 +2,6 @@ using AgroSolutions.IoT.Propriedades.Application.DTOs.Requests;
 using AgroSolutions.IoT.Propriedades.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace AgroSolutions.IoT.Propriedades.Api.Controllers;
 
@@ -19,19 +18,19 @@ public class TalhoesController : ControllerBase
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> AdicionarTalhao(Guid propriedadeId, [FromBody] CriarTalhaoRequest request)
     {
         try
         {
-            var produtorId = ObterProdutorId();
-            var response = await _talhaoService.AdicionarTalhaoAsync(propriedadeId, request, produtorId);
+            var response = await _talhaoService.AdicionarTalhaoAsync(propriedadeId, request);
             return CreatedAtAction(nameof(ListarTalhoes), new { propriedadeId }, response);
         }
         catch (ArgumentException ex)
         {
             return BadRequest(new { message = ex.Message });
         }
-        catch (UnauthorizedAccessException ex)
+        catch (UnauthorizedAccessException)
         {
             return Forbid();
         }
@@ -42,19 +41,19 @@ public class TalhoesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> ListarTalhoes(Guid propriedadeId)
     {
         try
         {
-            var produtorId = ObterProdutorId();
-            var talhoes = await _talhaoService.ListarTalhoesPorPropriedadeAsync(propriedadeId, produtorId);
+            var talhoes = await _talhaoService.ListarTalhoesPorPropriedadeAsync(propriedadeId);
             return Ok(talhoes);
         }
         catch (ArgumentException ex)
         {
             return BadRequest(new { message = ex.Message });
         }
-        catch (UnauthorizedAccessException ex)
+        catch (UnauthorizedAccessException)
         {
             return Forbid();
         }
@@ -65,12 +64,12 @@ public class TalhoesController : ControllerBase
     }
 
     [HttpGet("~/api/talhoes/{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> ObterTalhaoPorId(Guid id)
     {
         try
         {
-            var produtorId = ObterProdutorId();
-            var talhao = await _talhaoService.ObterPorIdAsync(id, produtorId);
+            var talhao = await _talhaoService.ObterPorIdAsync(id);
             return Ok(talhao);
         }
         catch (ArgumentException ex)
@@ -89,16 +88,5 @@ public class TalhoesController : ControllerBase
         {
             return StatusCode(500, new { message = "Erro ao obter talhão", details = ex.Message });
         }
-    }
-
-    private Guid ObterProdutorId()
-    {
-        var subClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                    ?? User.FindFirst("sub")?.Value;
-
-        if (string.IsNullOrEmpty(subClaim) || !Guid.TryParse(subClaim, out var produtorId))
-            throw new UnauthorizedAccessException("ProdutorId não encontrado no token");
-
-        return produtorId;
     }
 }

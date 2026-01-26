@@ -45,7 +45,7 @@ public class TalhaoServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        var resultado = await _service.AdicionarTalhaoAsync(propriedadeId, request, produtorId);
+        var resultado = await _service.AdicionarTalhaoAsync(propriedadeId, request);
 
         // Assert
         resultado.Should().NotBeNull();
@@ -76,41 +76,11 @@ public class TalhaoServiceTests
             .ReturnsAsync((Propriedade)null);
 
         // Act
-        Func<Task> act = async () => await _service.AdicionarTalhaoAsync(propriedadeId, request, produtorId);
+        Func<Task> act = async () => await _service.AdicionarTalhaoAsync(propriedadeId, request);
 
         // Assert
         await act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("Propriedade não encontrada");
-
-        _mockTalhaoRepository.Verify(r => r.AdicionarAsync(It.IsAny<Talhao>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task AdicionarTalhaoAsync_DeveLancarException_QuandoPropriedadeNaoPertencerAoProdutor()
-    {
-        // Arrange
-        var produtorId = Guid.NewGuid();
-        var outroProdutorId = Guid.NewGuid();
-        var propriedade = Propriedade.Criar("Fazenda Teste", outroProdutorId);
-        var propriedadeId = propriedade.Id;
-
-        var request = new CriarTalhaoRequest
-        {
-            Nome = "Talhão 01",
-            AreaEmHectares = 10m,
-            CulturaPlantada = "Soja"
-        };
-
-        _mockPropriedadeRepository
-            .Setup(r => r.ObterPorIdAsync(propriedadeId))
-            .ReturnsAsync(propriedade);
-
-        // Act
-        Func<Task> act = async () => await _service.AdicionarTalhaoAsync(propriedadeId, request, produtorId);
-
-        // Assert
-        await act.Should().ThrowAsync<UnauthorizedAccessException>()
-            .WithMessage("Propriedade não pertence ao produtor");
 
         _mockTalhaoRepository.Verify(r => r.AdicionarAsync(It.IsAny<Talhao>()), Times.Never);
     }
@@ -138,7 +108,7 @@ public class TalhaoServiceTests
             .ReturnsAsync(talhoes);
 
         // Act
-        var resultado = await _service.ListarTalhoesPorPropriedadeAsync(propriedadeId, produtorId);
+        var resultado = await _service.ListarTalhoesPorPropriedadeAsync(propriedadeId);
 
         // Assert
         resultado.Should().HaveCount(2);
@@ -159,34 +129,11 @@ public class TalhaoServiceTests
             .ReturnsAsync((Propriedade)null);
 
         // Act
-        Func<Task> act = async () => await _service.ListarTalhoesPorPropriedadeAsync(propriedadeId, produtorId);
+        Func<Task> act = async () => await _service.ListarTalhoesPorPropriedadeAsync(propriedadeId);
 
         // Assert
         await act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("Propriedade não encontrada");
-
-        _mockTalhaoRepository.Verify(r => r.ListarPorPropriedadeIdAsync(It.IsAny<Guid>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task ListarTalhoesPorPropriedadeAsync_DeveLancarException_QuandoPropriedadeNaoPertencerAoProdutor()
-    {
-        // Arrange
-        var produtorId = Guid.NewGuid();
-        var outroProdutorId = Guid.NewGuid();
-        var propriedade = Propriedade.Criar("Fazenda Teste", outroProdutorId);
-        var propriedadeId = propriedade.Id;
-
-        _mockPropriedadeRepository
-            .Setup(r => r.ObterPorIdAsync(propriedadeId))
-            .ReturnsAsync(propriedade);
-
-        // Act
-        Func<Task> act = async () => await _service.ListarTalhoesPorPropriedadeAsync(propriedadeId, produtorId);
-
-        // Assert
-        await act.Should().ThrowAsync<UnauthorizedAccessException>()
-            .WithMessage("Propriedade não pertence ao produtor");
 
         _mockTalhaoRepository.Verify(r => r.ListarPorPropriedadeIdAsync(It.IsAny<Guid>()), Times.Never);
     }
@@ -208,7 +155,7 @@ public class TalhaoServiceTests
             .ReturnsAsync(propriedade);
 
         // Act
-        var resultado = await _service.ObterPorIdAsync(talhao.Id, produtorId);
+        var resultado = await _service.ObterPorIdAsync(talhao.Id);
 
         // Assert
         resultado.Should().NotBeNull();
@@ -228,59 +175,10 @@ public class TalhaoServiceTests
             .ReturnsAsync((Talhao)null);
 
         // Act
-        Func<Task> act = async () => await _service.ObterPorIdAsync(talhaoId, produtorId);
+        Func<Task> act = async () => await _service.ObterPorIdAsync(talhaoId);
 
         // Assert
         await act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("Talhão não encontrado");
-    }
-
-    [Fact]
-    public async Task ObterPorIdAsync_DeveLancarException_QuandoPropriedadeNaoExistir()
-    {
-        // Arrange
-        var produtorId = Guid.NewGuid();
-        var propriedadeId = Guid.NewGuid();
-        var talhao = Talhao.Criar("Talhão 01", 10m, "Soja", propriedadeId);
-
-        _mockTalhaoRepository
-            .Setup(r => r.ObterPorIdAsync(talhao.Id))
-            .ReturnsAsync(talhao);
-
-        _mockPropriedadeRepository
-            .Setup(r => r.ObterPorIdAsync(propriedadeId))
-            .ReturnsAsync((Propriedade)null);
-
-        // Act
-        Func<Task> act = async () => await _service.ObterPorIdAsync(talhao.Id, produtorId);
-
-        // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("Propriedade não encontrada");
-    }
-
-    [Fact]
-    public async Task ObterPorIdAsync_DeveLancarUnauthorized_QuandoPropriedadeNaoPertencerAoProdutor()
-    {
-        // Arrange
-        var produtorId = Guid.NewGuid();
-        var outroProdutorId = Guid.NewGuid();
-        var propriedade = Propriedade.Criar("Fazenda Teste", outroProdutorId);
-        var talhao = Talhao.Criar("Talhão 01", 10m, "Soja", propriedade.Id);
-
-        _mockTalhaoRepository
-            .Setup(r => r.ObterPorIdAsync(talhao.Id))
-            .ReturnsAsync(talhao);
-
-        _mockPropriedadeRepository
-            .Setup(r => r.ObterPorIdAsync(propriedade.Id))
-            .ReturnsAsync(propriedade);
-
-        // Act
-        Func<Task> act = async () => await _service.ObterPorIdAsync(talhao.Id, produtorId);
-
-        // Assert
-        await act.Should().ThrowAsync<UnauthorizedAccessException>()
-            .WithMessage("Talhão não pertence ao produtor");
     }
 }
