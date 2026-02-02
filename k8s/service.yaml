@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: agrosolutions-propriedades
+spec:
+  type: LoadBalancer
+  selector:
+    app: agrosolutions-propriedades
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080

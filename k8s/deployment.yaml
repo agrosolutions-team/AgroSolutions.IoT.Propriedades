@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agrosolutions-propriedades
+  labels:
+    app: agrosolutions-propriedades
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agrosolutions-propriedades
+  template:
+    metadata:
+      labels:
+        app: agrosolutions-propriedades
+    spec:
+      containers:
+      - name: agrosolutions-propriedades
+        image: IMAGE_PLACEHOLDER
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: agrosolutions-propriedades-secret
